@@ -312,7 +312,8 @@ void cjson_map_insert(cjson_map *map, char *name, cjson_element *element)
     }
     else
     {
-        TODO(); // Change element and free previous
+        cjson_delete(item->element);
+        item->element = element;
     }
 }
 
