@@ -261,6 +261,7 @@ cjson_element *cjson_parse_str(char *str);
 
 #include <assert.h>
 #include <ctype.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 

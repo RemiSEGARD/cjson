@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 #define CJSON_IMPLEMENTATION
 #include "../cjson.h"
 
