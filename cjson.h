@@ -243,6 +243,10 @@ void cjson_str_builder_append_cstr(cjson_str_builder *sb, char *cstr);
  */
 char *cjson_to_str(cjson_element *element, int pretty);
 /**
+ * @brief returns a deep copy of the element
+ */
+cjson_element *cjson_clone(cjson_element *element);
+/**
  * @brief prints the element to stdout
  */
 void cjson_dump(cjson_element *element, int pretty);
@@ -258,6 +262,8 @@ void cjson_delete(cjson_element *element);
 cjson_element *cjson_parse_str(char *str);
 
 #ifdef CJSON_IMPLEMENTATION
+
+#define _POSIX_C_SOURCE 200809L
 
 #include <assert.h>
 #include <ctype.h>
@@ -1071,6 +1077,49 @@ char *cjson_to_str(cjson_element *element, int pretty)
     cjson_to_str_rec(element, pretty, &sb);
     cjson_str_builder_append_char(&sb, '\0');
     return sb.str;
+}
+
+cjson_element *cjson_clone(cjson_element *element)
+{
+    if (element == NULL)
+        return NULL;
+
+    cjson_element *res = NULL;
+    switch (element->element_type)
+    {
+    case CJSON_NULL:
+    case CJSON_BOOL:
+    case CJSON_INTEGER:
+    case CJSON_FLOAT:
+        res = calloc(1, sizeof(cjson_element));
+        res->element_type = element->element_type;
+        *res = *element;
+        break;
+    case CJSON_STRING:
+        res = calloc(1, sizeof(cjson_element));
+        res->element_type = CJSON_STRING;
+        res->value.string.value = strdup(element->value.string.value);
+        break;
+    case CJSON_ARRAY: {
+            res = cjson_create_array();
+            cjson_array *src_arr = cjson_as_array(element);
+            cjson_array *dst_arr = cjson_as_array(res);
+            for (size_t i = 0; i < src_arr->size; i++)
+                cjson_array_append(dst_arr, cjson_clone(src_arr->elements[i]));
+        } break;
+    case CJSON_OBJECT: {
+            cjson_object *src_obj = cjson_as_object(element);
+            res = cjson_create_object(src_obj->members.capacity);
+            cjson_object *dst_obj = cjson_as_object(res);
+            cjson_object_iterator it = cjson_iterate_object(src_obj);
+            while (!it.end)
+            {
+                cjson_object_insert(dst_obj, it.name, cjson_clone(it.element));
+                it = cjson_iterate_next(&it);
+            }
+        } break;
+    }
+    return res;
 }
 
 void cjson_dump(cjson_element *element, int pretty)

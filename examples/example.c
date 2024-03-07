@@ -64,9 +64,15 @@ int main()
     cjson_array_insert(arr, cjson_create_integer(5), 5);
     cjson_array_insert(arr, cjson_create_integer(4), 5);
 
+    cjson_element *clone = cjson_clone(elt);
+
     cjson_dump(elt, 1);
     putchar('\n');
     cjson_delete(elt);
+
+    cjson_dump(clone, 1);
+    cjson_delete(clone);
+
 
     return 0;
 }
