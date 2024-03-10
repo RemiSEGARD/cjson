@@ -1,3 +1,4 @@
+#include <stdio.h>
 #define CJSON_IMPLEMENTATION
 #include "../cjson.h"
 
@@ -16,27 +17,27 @@ int main()
     printf("Value of `test.test2[2].test3': %d\n", cjson_as_integer(t3));
 
     char *input3 = "{"
-                   "\"glossary\": {"
-                   "\"title\": \"example glossary\","
-                   "\"GlossDiv\": {"
-                   "\"title\": \"S\","
-                   "\"GlossList\": {"
-                   "\"GlossEntry\": {"
-                   "\"ID\": \"SGML\","
-                   "\"SortAs\": \"SGML\","
-                   "\"GlossTerm\": \"Standard Generalized Markup Language\","
-                   "\"Acronym\": \"SGML\","
-                   "\"Abbrev\": \"ISO 8879:1986\","
-                   "\"GlossDef\": {"
-                   "\"para\": \"A meta-markup language, used to create markup "
-                   "languages such as DocBook.\","
-                   "\"GlossSeeAlso\": [\"GML\", \"XML\"]"
-                   "},"
-                   "\"GlossSee\": \"markup\""
-                   "}"
-                   "}"
-                   "}"
-                   "}}";
+        "\"glossary\": {"
+        "\"title\": \"example glossary\","
+        "\"GlossDiv\": {"
+        "\"title\": \"S\","
+        "\"GlossList\": {"
+        "\"GlossEntry\": {"
+        "\"ID\": \"SGML\","
+        "\"SortAs\": \"SGML\","
+        "\"GlossTerm\": \"Standard Generalized Markup Language\","
+        "\"Acronym\": \"SGML\","
+        "\"Abbrev\": \"ISO 8879:1986\","
+        "\"GlossDef\": {"
+        "\"para\": \"A meta-markup language, used to create markup "
+        "languages such as DocBook.\","
+        "\"GlossSeeAlso\": [\"GML\", \"XML\"]"
+        "},"
+        "\"GlossSee\": \"markup\""
+        "}"
+        "}"
+        "}"
+        "}}";
 
     cjson_element *element3 = cjson_parse_str(input3);
     cjson_dump(element3, 0);
@@ -73,6 +74,11 @@ int main()
     cjson_dump(clone, 1);
     cjson_delete(clone);
 
+    char *test = "\"\\u00e9\"";
+    cjson_element *testelt = cjson_parse_str(test);
+    cjson_dump(testelt, 0);
+    putchar('\n');
+    cjson_delete(testelt);
 
     return 0;
 }

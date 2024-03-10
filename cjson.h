@@ -352,10 +352,15 @@ typedef struct
     double float_value;
 } cjson_token;
 
+int cjson_hex_to_int(char c)
+{
+    return isalpha(c) ? tolower(c) - 'a' + 10 : c - '0';
+}
+
 static char *cjson_extract_string(cjson_token *token)
 {
     assert(token->type == CJSON_STRING);
-    char *res = calloc(token->content_len - 1, sizeof(char));
+    unsigned char *res = calloc(token->content_len - 1, sizeof(char));
     size_t j = 0;
     for (size_t i = 1; i < token->content_len - 1; i++)
     {
@@ -386,7 +391,16 @@ static char *cjson_extract_string(cjson_token *token)
                 res[j] = '\t';
                 break;
             case 'u':
-                TODO();
+                i += 1;
+                res[j] = cjson_hex_to_int(token->content[i]) * 16
+                            + cjson_hex_to_int(token->content[i + 1]);
+                if (res[j] != 0)
+                    j += 1;
+                i += 2;
+                res[j] = cjson_hex_to_int(token->content[i]) * 16
+                            + cjson_hex_to_int(token->content[i + 1]);
+                i += 1;
+                break;
             default:
                 free(res);
                 return NULL;
@@ -490,7 +504,13 @@ void cjson_read_next_token(cjson_lexer *lexer)
                     token_len += 2;
                     break;
                 case 'u':
-                    TODO();
+                    token_len += 2;
+                    for (size_t end = token_len + 4; token_len < end; token_len++)
+                    {
+                        if (!(isalnum(input[token_len]) && tolower(input[token_len]) <= 'f'))
+                            goto token_error;
+                    }
+                    break;
                 default:
                     goto token_error;
                 }
@@ -1189,6 +1209,8 @@ void cjson_dump(cjson_element *element, int pretty)
 
 void cjson_delete(cjson_element *element)
 {
+    if (element == NULL)
+        return;
     if (element->element_type == CJSON_STRING)
         free(element->value.string.value);
     else if (element->element_type == CJSON_ARRAY)
